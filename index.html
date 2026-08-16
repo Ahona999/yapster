@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yapster Sign In</title>
+<style>
+  /* ---- tokens: light is the base, both dark states redefine only tokens ---- */
+  :root {
+    --ground:      #E4EBE7;
+    --ground-deep: #D3DED8;
+    --surface:     #FFFFFF;
+    --ink:         #13241F;
+    --ink-soft:    #4E635B;
+    --ink-faint:   #83968D;
+    --line:        #C9D6CF;
+    --line-soft:   #DFE8E3;
+    --accent:      #E24A1E;
+    --accent-ink:  #FFFFFF;
+    --accent-wash: #FBE7E0;
+    --pine:        #2C6A58;
+    --shadow:      0 1px 2px rgba(19, 36, 31, .06), 0 12px 32px -12px rgba(19, 36, 31, .22);
+    --shadow-lift: 0 2px 6px rgba(19, 36, 31, .10), 0 20px 44px -14px rgba(19, 36, 31, .34);
+
+    --f-display: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --f-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --f-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+
+    --step-0: 0.9375rem;
+    --step-1: 1.0625rem;
+    --step-2: 1.5rem;
+    --step-3: 2.125rem;
+    --step-4: clamp(2.75rem, 6vw, 4.25rem);
+    --micro: 0.6875rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0C1512;
+      --ground-deep: #060C0A;
+      --surface:     #16211D;
+      --ink:         #E7EFEA;
+      --ink-soft:    #A2B5AC;
+      --ink-faint:   #71857C;
+      --line:        #2A3833;
+      --line-soft:   #202C28;
+      --accent:      #FF6B41;
+      --accent-ink:  #1A0B05;
+      --accent-wash: #2C1710;
+      --pine:        #6BBFA5;
+      --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -12px rgba(0, 0, 0, .7);
+      --shadow-lift: 0 2px 6px rgba(0, 0, 0, .45), 0 20px 44px -14px rgba(0, 0, 0, .8);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0C1512;
+    --ground-deep: #060C0A;
+    --surface:     #16211D;
+    --ink:         #E7EFEA;
+    --ink-soft:    #A2B5AC;
+    --ink-faint:   #71857C;
+    --line:        #2A3833;
+    --line-soft:   #202C28;
+    --accent:      #FF6B41;
+    --accent-ink:  #1A0B05;
+    --accent-wash: #2C1710;
+    --pine:        #6BBFA5;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -12px rgba(0, 0, 0, .7);
+    --shadow-lift: 0 2px 6px rgba(0, 0, 0, .45), 0 20px 44px -14px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ground);
+    background-image: radial-gradient(120% 90% at 12% 0%, var(--ground) 0%, var(--ground-deep) 100%);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: var(--step-0);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: center;
+    justify-items: center;
+    gap: 3rem;
+    padding: 2.5rem 1.25rem 3rem;
+  }
+
+  @media (min-width: 960px) {
+    .page {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      align-items: center;
+      justify-items: stretch;
+      gap: 5rem;
+      max-width: 1120px;
+      margin-inline: auto;
+      padding-inline: 3rem;
+    }
+  }
+
+  /* ---- brand column ---- */
+  .brand { display: flex; flex-direction: column; gap: 1.75rem; max-width: 30rem; }
+  @media (max-width: 959px) { .brand { align-items: center; text-align: center; } }
+
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    gap: .1em;
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: var(--step-3);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .wordmark .dot { color: var(--accent); }
+
+  .tagline {
+    font-family: var(--f-display);
+    font-size: var(--step-4);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+    margin: 0;
+    font-weight: 400;
+  }
+  .tagline em { font-style: italic; color: var(--accent); }
+
+  .blurb { margin: 0; color: var(--ink-soft); font-size: var(--step-1); max-width: 34ch; }
+
+  .ticker {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    font-family: var(--f-mono);
+    font-size: var(--micro);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line-soft);
+  }
+  .ticker b {
+    color: var(--pine);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--pine);
+    box-shadow: 0 0 0 0 var(--pine);
+    animation: pulse 2.4s ease-out infinite;
+    flex: none;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pine) 55%, transparent); }
+    70%  { box-shadow: 0 0 0 9px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  /* ---- auth card ---- */
+  .card {
+    width: 100%;
+    max-width: 26rem;
+    justify-self: end;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  @media (max-width: 959px) { .card { justify-self: center; } }
+
+  .card h2 { font-family: var(--f-display); font-size: var(--step-2); letter-spacing: -0.015em; margin: 0; }
+  .card .sub { margin: -.75rem 0 0; color: var(--ink-soft); }
+
+  form { display: flex; flex-direction: column; gap: 1rem; }
+  .field { display: flex; flex-direction: column; gap: .375rem; }
+
+  label {
+    font-size: var(--micro);
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  input[type="email"], input[type="password"] {
+    font: inherit;
+    color: var(--ink);
+    background: var(--ground);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: .6875rem .8125rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input::placeholder { color: var(--ink-faint); }
+  input:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-wash);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: var(--micro);
+  }
+  .check { display: flex; align-items: center; gap: .5rem; color: var(--ink-soft); }
+  .check input { accent-color: var(--accent); width: 14px; height: 14px; }
+  .check label { text-transform: none; letter-spacing: 0; font-size: var(--micro); font-weight: 400; color: inherit; }
+
+  a { color: var(--ink-soft); text-decoration-color: var(--line); text-underline-offset: 3px; }
+  a:hover { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+  /* ---- the button that will not be caught ---- */
+  .slot { min-height: 46px; display: flex; }
+
+  #signin {
+    font: 600 var(--step-0)/1 var(--f-body);
+    letter-spacing: .01em;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    padding: 0 1.25rem;
+    height: 46px;
+    width: 100%;
+    cursor: pointer;
+    touch-action: manipulation;
+    box-shadow: var(--shadow);
+    transition: transform .16s cubic-bezier(.34, 1.4, .64, 1), box-shadow .16s ease;
+    z-index: 40;
+  }
+  #signin.loose {
+    position: fixed;
+    margin: 0;
+    box-shadow: var(--shadow-lift);
+  }
+  #signin.jolt { transform: rotate(var(--tilt, -3deg)) scale(.97); }
+
+  @media (prefers-reduced-motion: reduce) {
+    #signin { transition: none; }
+    .pulse { animation: none; }
+  }
+
+  .status {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 1.25rem;
+    font-size: var(--micro);
+    color: var(--ink-faint);
+  }
+  .status .taunt { color: var(--accent); font-weight: 600; }
+  .status .count { font-family: var(--f-mono); font-variant-numeric: tabular-nums; letter-spacing: .04em; white-space: nowrap; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    color: var(--ink-faint);
+    font-size: var(--micro);
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--line-soft); }
+
+  .alt { display: flex; flex-direction: column; gap: .5rem; }
+  .alt button {
+    font: 500 var(--step-0)/1 var(--f-body);
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    height: 42px;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .alt button:hover { background: var(--ground); border-color: var(--ink-faint); }
+  .alt button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .foot { margin: 0; text-align: center; color: var(--ink-soft); font-size: var(--micro); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translate(-50%, 150%);
+    background: var(--ink);
+    color: var(--ground);
+    font-size: var(--micro);
+    letter-spacing: .03em;
+    padding: .625rem 1rem;
+    border-radius: 999px;
+    box-shadow: var(--shadow-lift);
+    transition: transform .3s cubic-bezier(.2, .8, .3, 1);
+    z-index: 60;
+    pointer-events: none;
+  }
+  .toast.up { transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+
+<main class="page">
+  <section class="brand">
+    <h1 class="wordmark">Yapster<span class="dot">.</span></h1>
+    <p class="tagline">Everyone is talking. <em>Nobody</em> is listening.</p>
+    <p class="blurb">Post your thoughts into a void of 40 million strangers who are all posting into the same void. It's connection, technically.</p>
+    <p class="ticker"><span class="pulse"></span> <b id="yaps">4,812,663</b> yaps posted today</p>
+  </section>
+
+  <section class="card">
+    <h2>Welcome back</h2>
+    <p class="sub">Sign in to see what you missed. It was mostly arguing.</p>
+
+    <form id="form" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="off">
+      </div>
+
+      <div class="row">
+        <span class="check">
+          <input id="remember" type="checkbox">
+          <label for="remember">Keep me signed in</label>
+        </span>
+        <a href="#" id="forgot">Forgot password?</a>
+      </div>
+
+      <div class="slot">
+        <button id="signin" type="button">Sign in</button>
+      </div>
+
+      <p class="status">
+        <span class="taunt" id="taunt"></span>
+        <span class="count" id="count">attempts 000</span>
+      </p>
+    </form>
+
+    <p class="divider">or</p>
+
+    <div class="alt">
+      <button type="button" data-alt="Pigeon">Continue with Carrier Pigeon</button>
+      <button type="button" data-alt="Fax">Continue with Fax Machine</button>
+    </div>
+
+    <p class="foot">New to Yapster? <a href="#" id="signup">Create an account</a></p>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var btn   = document.getElementById("signin");
+  var slot  = btn.parentElement;
+  var taunt = document.getElementById("taunt");
+  var count = document.getElementById("count");
+  var toast = document.getElementById("toast");
+
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var coarse  = window.matchMedia("(pointer: coarse)").matches;
+
+  var loose    = false;   // has the button left its slot?
+  var attempts = 0;
+  var pos      = { x: 0, y: 0 };
+  var lastMove = 0;
+
+  var PAD       = 14;     // keep this far from the viewport edges
+  var PROXIMITY = coarse ? 0 : 96;  // cursor gets this close and it bolts
+
+  var TAUNTS = [
+    "Nope.",
+    "Not today.",
+    "So close.",
+    "Try harder.",
+    "This is embarrassing.",
+    "You're not built for this.",
+    "The button has a restraining order.",
+    "Have you considered giving up?",
+    "It's faster than you. Accept it.",
+    "Yapster admires your persistence."
+  ];
+
+  var LABELS = ["Sign in", "Sign in", "Missed", "Nope", "Sign in", "Too slow", "Sign in", "Almost"];
+
+  /* Freeze the button's size and hand it over to fixed positioning, so the
+     card's layout doesn't collapse the moment it runs off. */
+  function cutLoose() {
+    var r = btn.getBoundingClientRect();
+    slot.style.minHeight = r.height + "px";
+    btn.style.width  = r.width + "px";
+    btn.style.height = r.height + "px";
+    pos.x = r.left;
+    pos.y = r.top;
+    btn.classList.add("loose");
+    place(pos.x, pos.y);
+    loose = true;
+  }
+
+  function place(x, y) {
+    var r = btn.getBoundingClientRect();
+    pos.x = clamp(x, PAD, window.innerWidth  - r.width  - PAD);
+    pos.y = clamp(y, PAD, window.innerHeight - r.height - PAD);
+    btn.style.left = pos.x + "px";
+    btn.style.top  = pos.y + "px";
+  }
+
+  function clamp(v, lo, hi) { return hi < lo ? lo : Math.min(Math.max(v, lo), hi); }
+
+  /* Pick the roomiest of a handful of random landing spots — random alone
+     produces the occasional useless hop right back under the cursor. */
+  function flee(cx, cy) {
+    if (!loose) cutLoose();
+
+    var r   = btn.getBoundingClientRect();
+    var maxX = Math.max(PAD, window.innerWidth  - r.width  - PAD);
+    var maxY = Math.max(PAD, window.innerHeight - r.height - PAD);
+
+    var best = null, bestScore = -1;
+    for (var i = 0; i < 24; i++) {
+      var x = PAD + Math.random() * (maxX - PAD);
+      var y = PAD + Math.random() * (maxY - PAD);
+      var dx = (x + r.width  / 2) - cx;
+      var dy = (y + r.height / 2) - cy;
+      var score = Math.sqrt(dx * dx + dy * dy);
+      if (score > bestScore) { bestScore = score; best = { x: x, y: y }; }
+      if (score > Math.min(window.innerWidth, window.innerHeight) * 0.65) break;
+    }
+
+    place(best.x, best.y);
+
+    if (!reduced) {
+      btn.style.setProperty("--tilt", (Math.random() * 10 - 5).toFixed(1) + "deg");
+      btn.classList.add("jolt");
+      setTimeout(function () { btn.classList.remove("jolt"); }, 160);
+    }
+  }
+
+  function register() {
+    attempts++;
+    count.textContent = "attempts " + String(attempts).padStart(3, "0");
+    taunt.textContent = TAUNTS[Math.min(attempts - 1, TAUNTS.length - 1)];
+    btn.textContent   = LABELS[attempts % LABELS.length];
+    if (attempts === 15) say("Fifteen attempts. The button is enjoying this.");
+    if (attempts === 30) say("Thirty. Genuinely, this is the most engagement Yapster has ever had.");
+  }
+
+  var toastTimer;
+  function say(msg) {
+    toast.textContent = msg;
+    toast.classList.add("up");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("up"); }, 3600);
+  }
+
+  /* Desktop: dodge on approach, before the click ever happens. */
+  window.addEventListener("pointermove", function (e) {
+    if (PROXIMITY === 0 || e.pointerType === "touch") return;
+
+    var now = e.timeStamp;
+    if (now - lastMove < 40) return;   // don't thrash on every single sample
+    lastMove = now;
+
+    var r = btn.getBoundingClientRect();
+    var nearX = e.clientX > r.left - PROXIMITY && e.clientX < r.right  + PROXIMITY;
+    var nearY = e.clientY > r.top  - PROXIMITY && e.clientY < r.bottom + PROXIMITY;
+
+    if (nearX && nearY) {
+      flee(e.clientX, e.clientY);
+      register();
+    }
+  }, { passive: true });
+
+  /* Touch and stylus: no hover to warn us, so bail out on the press itself. */
+  btn.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    flee(e.clientX, e.clientY);
+    register();
+  });
+
+  /* Keyboard and anything else that manages to fire a real click. */
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    var r = btn.getBoundingClientRect();
+    flee(r.left + r.width / 2, r.top + r.height / 2);
+    register();
+    btn.blur();
+  });
+
+  btn.addEventListener("focus", function () {
+    if (attempts > 0) say("It sees you coming.");
+  });
+
+  window.addEventListener("resize", function () {
+    if (loose) place(pos.x, pos.y);
+  });
+
+  /* Everything that isn't the sign in button works perfectly. That's the joke. */
+  document.getElementById("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    say("Nice try. Submitting the form still needs the button.");
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-alt]"), function (b) {
+    b.addEventListener("click", function () {
+      say(b.dataset.alt === "Pigeon" ? "Pigeon dispatched. Estimated arrival: 6–8 weeks." : "Fax sent. Please remain by the machine.");
+    });
+  });
+
+  document.getElementById("forgot").addEventListener("click", function (e) {
+    e.preventDefault();
+    say("Your password is fine. The button is the problem.");
+  });
+
+  document.getElementById("signup").addEventListener("click", function (e) {
+    e.preventDefault();
+    say("Sign up is behind the sign in button. Sorry.");
+  });
+
+  /* Ambient yap counter — the number has to keep climbing without you. */
+  var yaps = 4812663;
+  var yapEl = document.getElementById("yaps");
+  setInterval(function () {
+    yaps += 1 + Math.floor(Math.random() * 5);
+    yapEl.textContent = yaps.toLocaleString("en-US");
+  }, 1400);
+})();
+</script>
+
+</body>
+</html>

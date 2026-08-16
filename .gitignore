@@ -1,0 +1,6 @@
+# Machine-specific Claude Code permissions, not useful to anyone else
+.claude/settings.local.json
+
+node_modules/
+.DS_Store
+Thumbs.db
