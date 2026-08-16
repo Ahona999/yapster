@@ -19,6 +19,9 @@
     --accent-ink:  #FFFFFF;
     --accent-wash: #FBE7E0;
     --pine:        #2C6A58;
+    --cta:         #107553;
+    --cta-ink:     #FFFFFF;
+    --cta-wash:    #D6EDE2;
     --shadow:      0 1px 2px rgba(19, 36, 31, .06), 0 12px 32px -12px rgba(19, 36, 31, .22);
     --shadow-lift: 0 2px 6px rgba(19, 36, 31, .10), 0 20px 44px -14px rgba(19, 36, 31, .34);
 
@@ -48,6 +51,9 @@
       --accent-ink:  #1A0B05;
       --accent-wash: #2C1710;
       --pine:        #6BBFA5;
+      --cta:         #3FD79C;
+      --cta-ink:     #052117;
+      --cta-wash:    #103328;
       --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -12px rgba(0, 0, 0, .7);
       --shadow-lift: 0 2px 6px rgba(0, 0, 0, .45), 0 20px 44px -14px rgba(0, 0, 0, .8);
     }
@@ -66,6 +72,9 @@
     --accent-ink:  #1A0B05;
     --accent-wash: #2C1710;
     --pine:        #6BBFA5;
+    --cta:         #3FD79C;
+    --cta-ink:     #052117;
+    --cta-wash:    #103328;
     --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -12px rgba(0, 0, 0, .7);
     --shadow-lift: 0 2px 6px rgba(0, 0, 0, .45), 0 20px 44px -14px rgba(0, 0, 0, .8);
   }
@@ -232,8 +241,8 @@
   #signin {
     font: 600 var(--step-0)/1 var(--f-body);
     letter-spacing: .01em;
-    color: var(--accent-ink);
-    background: var(--accent);
+    color: var(--cta-ink);
+    background: var(--cta);
     border: none;
     border-radius: 9px;
     padding: 0 1.25rem;
@@ -249,6 +258,11 @@
     position: fixed;
     margin: 0;
     box-shadow: var(--shadow-lift);
+  }
+  #signin:focus-visible {
+    outline: 2px solid var(--cta);
+    outline-offset: 3px;
+    box-shadow: var(--shadow), 0 0 0 6px var(--cta-wash);
   }
   #signin.jolt { transform: rotate(var(--tilt, -3deg)) scale(.97); }
 
