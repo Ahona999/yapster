@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agentation diagnostic</title>
+<style>
+  body { font: 14px/1.6 ui-monospace, Consolas, monospace; background: #0d1117; color: #e6edf3; padding: 2rem; }
+  h1 { font-size: 1.1rem; color: #7ee787; }
+  #out { white-space: pre-wrap; }
+  .ok   { color: #7ee787; }
+  .bad  { color: #ff7b72; }
+  .note { color: #8b949e; }
+</style>
+</head>
+<body>
+<h1>Agentation diagnostic</h1>
+<div id="out">running…</div>
+
+<script>window.process = { env: { NODE_ENV: "development" } };</script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?deps=react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1"
+  }
+}
+</script>
+<script type="module">
+  const out = document.getElementById("out");
+  out.textContent = "";
+  const line = (msg, cls) => {
+    const d = document.createElement("div");
+    if (cls) d.className = cls;
+    d.textContent = msg;
+    out.appendChild(d);
+  };
+
+  // Surface anything the module graph throws asynchronously.
+  window.addEventListener("error", (e) => line("WINDOW ERROR: " + e.message, "bad"));
+  window.addEventListener("unhandledrejection", (e) => line("UNHANDLED REJECTION: " + e.reason, "bad"));
+
+  async function step(label, fn) {
+    try {
+      const v = await fn();
+      line("PASS  " + label, "ok");
+      return v;
+    } catch (err) {
+      line("FAIL  " + label, "bad");
+      line("      " + (err && err.message ? err.message : String(err)), "bad");
+      return null;
+    }
+  }
+
+  const React = await step("import react (esm.sh CDN)", () => import("react"));
+  const RDC   = await step("import react-dom/client (esm.sh CDN)", () => import("react-dom/client"));
+  const RD    = await step("import react-dom (esm.sh CDN)", () => import("react-dom"));
+  const AG    = await step("import agentation (local node_modules)", () => import("/node_modules/agentation/dist/index.mjs"));
+
+  if (React && RDC && AG) {
+    line("");
+    line("React version: " + (React.version || "unknown"), "note");
+    line("Agentation export is a " + typeof AG.Agentation, AG.Agentation ? "ok" : "bad");
+    line("sessionStorage toolbar-hidden flag: " +
+      (Object.keys(sessionStorage).filter(k => /toolbar|hidden|agentation/i.test(k)).join(", ") || "none set"), "note");
+
+    await step("mount <Agentation />", () => {
+      const host = document.createElement("div");
+      document.body.appendChild(host);
+      RDC.createRoot(host).render(React.createElement(AG.Agentation));
+    });
+
+    // The component portals into <body> after its mount effect runs.
+    await new Promise(r => setTimeout(r, 1200));
+    const added = document.body.children.length;
+    line("");
+    line("Elements now in <body>: " + added, "note");
+    const fixed = [...document.body.querySelectorAll("*")].filter(el => {
+      const s = getComputedStyle(el);
+      return s.position === "fixed" && s.display !== "none" && s.visibility !== "hidden";
+    });
+    line("Visible position:fixed elements (toolbar should be one): " + fixed.length,
+         fixed.length ? "ok" : "bad");
+    if (fixed.length) {
+      fixed.slice(0, 5).forEach(el => {
+        const s = getComputedStyle(el);
+        line("      <" + el.tagName.toLowerCase() + "> z-index:" + s.zIndex +
+             " bottom:" + s.bottom + " right:" + s.right + " opacity:" + s.opacity, "note");
+      });
+    }
+  }
+
+  line("");
+  line("— diagnostic complete —", "note");
+</script>
+</body>
+</html>

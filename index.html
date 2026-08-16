@@ -22,6 +22,7 @@
     --cta:         #107553;
     --cta-ink:     #FFFFFF;
     --cta-wash:    #D6EDE2;
+    --slot:        #F3C623;
     --shadow:      0 1px 2px rgba(19, 36, 31, .06), 0 12px 32px -12px rgba(19, 36, 31, .22);
     --shadow-lift: 0 2px 6px rgba(19, 36, 31, .10), 0 20px 44px -14px rgba(19, 36, 31, .34);
 
@@ -54,6 +55,7 @@
       --cta:         #3FD79C;
       --cta-ink:     #052117;
       --cta-wash:    #103328;
+      --slot:        #C79A2B;
       --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -12px rgba(0, 0, 0, .7);
       --shadow-lift: 0 2px 6px rgba(0, 0, 0, .45), 0 20px 44px -14px rgba(0, 0, 0, .8);
     }
@@ -75,6 +77,7 @@
     --cta:         #3FD79C;
     --cta-ink:     #052117;
     --cta-wash:    #103328;
+    --slot:        #C79A2B;
     --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -12px rgba(0, 0, 0, .7);
     --shadow-lift: 0 2px 6px rgba(0, 0, 0, .45), 0 20px 44px -14px rgba(0, 0, 0, .8);
   }
@@ -174,6 +177,10 @@
     100% { box-shadow: 0 0 0 0 transparent; }
   }
 
+  .art { margin: 0; max-width: 22rem; }
+  .art svg { display: block; }
+  @media (max-width: 959px) { .art { margin-inline: auto; } }
+
   /* ---- auth card ---- */
   .card {
     width: 100%;
@@ -213,6 +220,11 @@
     padding: .6875rem .8125rem;
     transition: border-color .15s ease, box-shadow .15s ease;
   }
+  /* Heavier outline on the password field. The ID beats `input:focus-visible`,
+     so the focus colour has to be restated at the same specificity. */
+  #password { border-width: 2.5px; border-color: var(--ink-soft); }
+  #password:focus-visible { border-color: var(--accent); }
+
   input::placeholder { color: var(--ink-faint); }
   input:focus-visible {
     outline: none;
@@ -236,7 +248,12 @@
   a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
   /* ---- the button that will not be caught ---- */
-  .slot { min-height: 46px; display: flex; }
+  .slot {
+    min-height: 46px;
+    display: flex;
+    background: var(--slot);
+    border-radius: 9px;
+  }
 
   #signin {
     font: 600 var(--step-0)/1 var(--f-body);
@@ -334,9 +351,34 @@
 <main class="page">
   <section class="brand">
     <h1 class="wordmark">Yapster<span class="dot">.</span></h1>
-    <p class="tagline">Everyone is talking. <em>Nobody</em> is listening.</p>
+    <p class="tagline">Your opinion <em>definitely</em> matters here.</p>
     <p class="blurb">Post your thoughts into a void of 40 million strangers who are all posting into the same void. It's connection, technically.</p>
     <p class="ticker"><span class="pulse"></span> <b id="yaps">4,812,663</b> yaps posted today</p>
+
+    <!-- Inline SVG rather than a file: keeps the page self-contained and lets the
+         art follow the theme tokens in both light and dark. -->
+    <figure class="art" aria-hidden="true">
+      <svg viewBox="0 0 320 108" width="100%" height="auto" fill="none">
+        <rect x="1" y="9" width="150" height="54" rx="15" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
+        <circle cx="46" cy="36" r="4" fill="var(--ink-faint)"/>
+        <circle cx="66" cy="36" r="4" fill="var(--ink-faint)"/>
+        <circle cx="86" cy="36" r="4" fill="var(--ink-faint)"/>
+
+        <rect x="170" y="1" width="112" height="44" rx="13" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="1.5"/>
+        <circle cx="206" cy="23" r="3.5" fill="var(--accent)"/>
+        <circle cx="224" cy="23" r="3.5" fill="var(--accent)"/>
+        <circle cx="242" cy="23" r="3.5" fill="var(--accent)"/>
+
+        <rect x="122" y="60" width="132" height="46" rx="13" fill="var(--surface)" stroke="var(--line-soft)" stroke-width="1.5"/>
+        <circle cx="164" cy="83" r="3.5" fill="var(--ink-faint)"/>
+        <circle cx="182" cy="83" r="3.5" fill="var(--ink-faint)"/>
+        <circle cx="200" cy="83" r="3.5" fill="var(--ink-faint)"/>
+
+        <circle cx="275" cy="66" r="5" fill="var(--pine)" opacity=".8"/>
+        <circle cx="295" cy="80" r="3.5" fill="var(--pine)" opacity=".5"/>
+        <circle cx="309" cy="92" r="2" fill="var(--pine)" opacity=".3"/>
+      </svg>
+    </figure>
   </section>
 
   <section class="card">
@@ -375,7 +417,6 @@
     <p class="divider">or</p>
 
     <div class="alt">
-      <button type="button" data-alt="Pigeon">Continue with Carrier Pigeon</button>
       <button type="button" data-alt="Fax">Continue with Fax Machine</button>
     </div>
 
@@ -541,7 +582,7 @@
 
   Array.prototype.forEach.call(document.querySelectorAll("[data-alt]"), function (b) {
     b.addEventListener("click", function () {
-      say(b.dataset.alt === "Pigeon" ? "Pigeon dispatched. Estimated arrival: 6–8 weeks." : "Fax sent. Please remain by the machine.");
+      say("Fax sent. Please remain by the machine.");
     });
   });
 
@@ -563,6 +604,35 @@
     yapEl.textContent = yaps.toLocaleString("en-US");
   }, 1400);
 })();
+</script>
+
+<!-- ---- Agentation: dev-only visual feedback toolbar. Remove before shipping. ----
+     This page has no bundler, so React comes from a CDN as ESM (npm's React is
+     CommonJS and won't load in a browser) and the import map resolves the bare
+     specifiers inside agentation's own ESM build. -->
+<!-- agentation's build ships an unsubstituted `process.env.NODE_ENV` (dist/index.mjs:8398).
+     A bundler would replace it; with no bundler we define it, or the component throws
+     mid-render. Classic scripts run before deferred module scripts, so this lands first. -->
+<script>window.process = { env: { NODE_ENV: "development" } };</script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?deps=react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1"
+  }
+}
+</script>
+<script type="module">
+  import { createElement } from "react";
+  import { createRoot } from "react-dom/client";
+  import { Agentation } from "/node_modules/agentation/dist/index.mjs";
+
+  const host = document.createElement("div");
+  host.id = "agentation-root";
+  document.body.appendChild(host);
+  createRoot(host).render(createElement(Agentation));
 </script>
 
 </body>
